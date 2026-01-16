@@ -1,1 +1,65 @@
-export function getPostalAddress() {}
+import axios from 'axios'
+interface Geo {
+  lat: string
+  lng: string
+}
+
+interface Address {
+  street: string
+  suite: string
+  city: string
+  zipcode: string
+  geo: Geo
+}
+
+interface UserInput {
+  id: number
+  name: string
+  phone: string
+  address: Address | null
+}
+
+interface ApiUser {
+  id: number
+  name: string
+  phone: string
+  address?: {
+    street: string
+    suite: string
+    city: string
+    zipcode: string
+    geo: {
+      lat: string
+      lng: string
+    }
+  }
+}
+
+export async function getPostalAddress(): Promise<UserInput[]> {
+  try {
+    const response = await axios.get<ApiUser[]>('https://jsonplaceholder.typicode.com/users');
+    const users = response.data;
+    
+    if (!users || users.length === 0) {
+      return [];
+    }
+    
+    return users.map((usersss) => ({
+      id: usersss.id,
+      name: usersss.name,
+      phone: usersss.phone,
+      address: usersss.address ? {
+      street: usersss.address.street,
+      suite: usersss.address.suite,
+      city: usersss.address.city,
+      zipcode: usersss.address.zipcode,
+      geo: {
+        lat: usersss.address.geo.lat,
+        lng: usersss.address.geo.lng
+      }
+      } : null
+    }));
+  } catch (error) {
+    return [];
+  }
+}
